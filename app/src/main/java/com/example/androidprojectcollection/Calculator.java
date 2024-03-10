@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Stack;
 
@@ -17,7 +18,8 @@ public class Calculator extends AppCompatActivity {
     Button btnAdd, btnMinus, btnMultiply, btnDivide, btnDecimal, btnEquals;
     TextView txtResult, txtEqua, txtTest;
     Stack<String> calcu = new Stack<String>();
-    int equaLen, result; //equaLen len until sa op. 123+ is len: 4
+    int equaLen;
+    BigDecimal result; //equaLen len until sa op. 123+ is len: 4
     StringBuilder strEqua, strResult;
     boolean isOp = false;
     String op;
@@ -147,8 +149,6 @@ public class Calculator extends AppCompatActivity {
             public void onClick(View view) {
                 strEqua = new StringBuilder(txtEqua.getText().toString());
 
-                calcu.push(txtResult.getText().toString());
-
                 operator(strEqua,'+');
                 op = "+";
             }
@@ -158,10 +158,9 @@ public class Calculator extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 strEqua = new StringBuilder(txtEqua.getText().toString());
-                calcu.push(txtResult.getText().toString());
 
                 operator(strEqua,'-');
-
+                op = "-";
             }
         });
 
@@ -169,9 +168,9 @@ public class Calculator extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 strEqua = new StringBuilder(txtEqua.getText().toString());
-                calcu.push(txtResult.getText().toString());
 
                 operator(strEqua,'*');
+                op = "*";
             }
         });
 
@@ -179,9 +178,9 @@ public class Calculator extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 strEqua = new StringBuilder(txtEqua.getText().toString());
-                calcu.push(txtResult.getText().toString());
 
                 operator(strEqua,'/');
+                op = "/";
             }
         });
 
@@ -195,6 +194,13 @@ public class Calculator extends AppCompatActivity {
     }
 
     public void operator(StringBuilder str, char op) {
+        if(calcu.size() == 1) {
+            calcu.pop();
+            calcu.push(String.valueOf(result));
+        } else {
+            calcu.push(txtResult.getText().toString());
+        }
+
         if(!Character.isDigit(str.charAt(str.length()-1)) && str.charAt(str.length()-1) != '.') {
             str.setCharAt(str.length()-1,op);
         } else {
@@ -202,7 +208,8 @@ public class Calculator extends AppCompatActivity {
         }
         txtResult.setText("");
         txtEqua.setText(str.toString());
-        isOp = true;
+
+        equaLen = txtEqua.length();
     }
 
     public void btnNumAppend(int num) {
@@ -215,19 +222,26 @@ public class Calculator extends AppCompatActivity {
     }
 
     public void calcuSequential(String op) {
+        String newTermSHIT = txtEqua.getText().toString().substring(equaLen-1);
 
-        String num1, num2;
-        float result = 0;
+        BigDecimal testNum1 = new BigDecimal(calcu.peek());
+        BigDecimal testNum2 = new BigDecimal(newTermSHIT);
 
         switch(op) {
             case "+":
-                num2 = txtResult.getText().toString();
-                num1 = calcu.pop();
-                result = Float.parseFloat(num1) + Float.parseFloat(num2);
+                result = testNum1.add(testNum2);
+                break;
+            case "-":
+                result = testNum1.min(testNum2);
+                break;
+            case "*":
+                result = testNum1.multiply(testNum2);
+                break;
+            case "/":
+                result = testNum1.divide(testNum2);
                 break;
         }
 
-        calcu.push(String.valueOf(result));
         System.out.println(result);
         txtResult.setText("");
         txtResult.setText(result+"");
