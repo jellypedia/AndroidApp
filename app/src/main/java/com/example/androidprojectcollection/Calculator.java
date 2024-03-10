@@ -21,8 +21,7 @@ public class Calculator extends AppCompatActivity {
     int equaLen;
     BigDecimal result; //equaLen len until sa op. 123+ is len: 4
     StringBuilder strEqua, strResult;
-    boolean isOp = false;
-    String op;
+    char op;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,7 +149,7 @@ public class Calculator extends AppCompatActivity {
                 strEqua = new StringBuilder(txtEqua.getText().toString());
 
                 operator(strEqua,'+');
-                op = "+";
+                op = '+';
             }
         });
 
@@ -160,7 +159,7 @@ public class Calculator extends AppCompatActivity {
                 strEqua = new StringBuilder(txtEqua.getText().toString());
 
                 operator(strEqua,'-');
-                op = "-";
+                op = '-';
             }
         });
 
@@ -170,7 +169,7 @@ public class Calculator extends AppCompatActivity {
                 strEqua = new StringBuilder(txtEqua.getText().toString());
 
                 operator(strEqua,'*');
-                op = "*";
+                op = '*';
             }
         });
 
@@ -180,7 +179,7 @@ public class Calculator extends AppCompatActivity {
                 strEqua = new StringBuilder(txtEqua.getText().toString());
 
                 operator(strEqua,'/');
-                op = "/";
+                op = '/';
             }
         });
 
@@ -190,7 +189,6 @@ public class Calculator extends AppCompatActivity {
                 txtResult.append(""+result);
             }
         });
-
     }
 
     public void operator(StringBuilder str, char op) {
@@ -206,7 +204,7 @@ public class Calculator extends AppCompatActivity {
         } else {
             str.append(op);
         }
-        txtResult.setText("");
+
         txtEqua.setText(str.toString());
 
         equaLen = txtEqua.length();
@@ -221,30 +219,33 @@ public class Calculator extends AppCompatActivity {
         }
     }
 
-    public void calcuSequential(String op) {
-        String newTermSHIT = txtEqua.getText().toString().substring(equaLen-1);
+    public void calcuSequential(char op) {
+        String newTermSHIT = txtEqua.getText().toString().substring(equaLen);
 
         BigDecimal testNum1 = new BigDecimal(calcu.peek());
         BigDecimal testNum2 = new BigDecimal(newTermSHIT);
 
         switch(op) {
-            case "+":
+            case '+':
                 result = testNum1.add(testNum2);
+                txtTest.append("nigana si plus");
                 break;
-            case "-":
-                result = testNum1.min(testNum2);
+            case '-':
+                result = testNum2.min(testNum1);
+                txtTest.append("nigana si minus RESULT IS: " + result);
                 break;
-            case "*":
+            case '*':
                 result = testNum1.multiply(testNum2);
+                txtTest.setText("nigana si times");
                 break;
-            case "/":
+            case '/':
                 result = testNum1.divide(testNum2);
+                txtTest.setText("nigana si divide");
                 break;
         }
 
-        System.out.println(result);
         txtResult.setText("");
-        txtResult.setText(result+"");
+        txtResult.setText(String.valueOf(result));
 
     }
 }
