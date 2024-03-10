@@ -231,7 +231,7 @@ public class Calculator extends AppCompatActivity {
                 txtTest.append("nigana si plus");
                 break;
             case '-':
-                result = testNum2.min(testNum1);
+                result = testNum1.subtract(testNum2);
                 txtTest.append("nigana si minus RESULT IS: " + result);
                 break;
             case '*':
