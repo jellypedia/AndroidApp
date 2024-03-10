@@ -16,6 +16,12 @@
             android:layout_height="89dp" />
 
         <TextView
+            android:id="@+id/txtTesting"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="TextView" />
+
+        <TextView
             android:id="@+id/txtEqua"
             android:layout_width="match_parent"
             android:layout_height="42dp"
