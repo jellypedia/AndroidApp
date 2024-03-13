@@ -11,6 +11,7 @@ import android.widget.TextView;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Stack;
@@ -19,7 +20,7 @@ public class Calculator extends AppCompatActivity {
     Button btnOne, btnTwo, btnThree, btnFour, btnFive;
     Button btnSix, btnSeven, btnEight, btnNine, btnZero;
     Button btnAdd, btnMinus, btnMultiply, btnDivide, btnDecimal, btnEquals;
-    TextView txtResult, txtEqua, txtTest;
+    TextView txtResult, txtEqua;
     Stack<String> calcuSeq = new Stack<String>();
     int equaLen;
     BigDecimal result; //equaLen len until sa op. 123+ is len: 4
@@ -49,7 +50,6 @@ public class Calculator extends AppCompatActivity {
 
         txtResult = findViewById(R.id.txtResult);
         txtEqua = findViewById(R.id.txtEqua);
-        txtTest = findViewById(R.id.txtTesting);
 
         btnDecimal.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("SetTextI18n")
@@ -57,6 +57,7 @@ public class Calculator extends AppCompatActivity {
             public void onClick(View view) {
                 strEqua = new StringBuilder(txtEqua.getText().toString());
                 strResult = new StringBuilder(txtResult.getText().toString());
+                String newTerm = txtEqua.getText().toString().substring(equaLen);
 
                 if(!txtResult.getText().toString().contains(".")) { //walay decimal, igo ra-add
                     if(txtResult.getText().toString().isEmpty()) {
@@ -72,6 +73,10 @@ public class Calculator extends AppCompatActivity {
 
                     txtResult.setText(strResult.toString());
                     txtEqua.setText(strEqua.toString());
+                } else if (newTerm.length() == 0) {
+                    txtEqua.setText(strEqua.toString() + "0.");
+                } else if (!newTerm.contains(".")) {
+                    txtEqua.setText(strEqua.toString() + ".");
                 }
             }
         });
@@ -238,7 +243,6 @@ public class Calculator extends AppCompatActivity {
                 result = testNum1.multiply(testNum2);
                 break;
             case '/':
-//                // TODO: AIRTHMETICEXCEPTION SHIT
                 try {
                     result = testNum1.divide(testNum2);
                 } catch (ArithmeticException e) {
@@ -247,10 +251,7 @@ public class Calculator extends AppCompatActivity {
                     } else {
                         result = BigDecimal.valueOf(0);
                     }
-//                    throw new ArithmeticException("real");
-
                 }
-
                 break;
         }
 
@@ -260,35 +261,81 @@ public class Calculator extends AppCompatActivity {
 
     Stack<String> MDASnum = new Stack<>();
     Stack<String> MDASop = new Stack<>();
-    List<String> infix = new ArrayList<>();
     @SuppressLint("SetTextI18n")
     public void getInfix() {
-        // get txtEqua string and split it by ops and numbers
-        // store into list in order
-        // [0] = 7, [1] = +, [2] = 5, [3] = * ... etc
-        String strFullEqua = txtEqua.getText().toString();
-        txtResult.setText("og text shit: " + strFullEqua);
+        // 4-7*9+1/2
 
-        String[] numbers = strFullEqua.split("[+\\-*/]");
+        String[] ambotTEST = strEqua.toString().split("(?=[+\\-*/])|(?<=[+\\-*/])");
+        String[] realKapoy = new String[ambotTEST.length+1];
 
-        for (int i = 0; i < numbers.length; i++) {
-            numbers[i] = numbers[i].trim();
-            System.out.println(numbers[i]);
+        for(int i = 0; i < ambotTEST.length; i++) {
+            realKapoy[i] = ambotTEST[i];
         }
 
-        String[] operators = strFullEqua.split("[0-9]+");
+        realKapoy[ambotTEST.length] = txtEqua.getText().toString().substring(equaLen);
+        String tempOP;
+        BigDecimal num1, num2;
+        BigDecimal MDASresult;
+        // 9,-,3,*,5,+,1
 
-        for (int i = 0; i < numbers.length; i++) {
-            infix.add(numbers[i]);
-            if (i < operators.length) {
-                infix.add(operators[i]);
+        for(int i = 0; i < ambotTEST.length; i++) {
+            if(ambotTEST[i].matches("[+\\-*/]")) {
+                MDASnum.add(realKapoy[i]);
+                // 9,3,5
+            } else if(realKapoy[i] == "+" || realKapoy[i] == "-" && MDASop.peek() == "*" || MDASop.peek() == "/") { // if u try to stack -/+ on top of * / /
+                    tempOP = realKapoy[i];
+                    while(MDASnum.size() != 1) { //goal is result nalay nabilin sa stack
+                        switch(MDASop.peek()) {
+                            case "+":
+                                num1 = new BigDecimal(MDASnum.pop());
+                                num2 = new BigDecimal(MDASnum.pop());
+
+                                MDASresult = num1.add(num2);
+                                MDASnum.push(MDASresult.toString());
+                                break;
+                            case "-":
+                                num1 = new BigDecimal(MDASnum.pop());
+                                num2 = new BigDecimal(MDASnum.pop());
+
+                                MDASresult = num2.subtract(num1);
+                                MDASnum.push(MDASresult.toString());
+                                break;
+                            case "*":
+                                num1 = new BigDecimal(MDASnum.pop());
+                                num2 = new BigDecimal(MDASnum.pop());
+
+                                MDASresult = num1.multiply(num2);
+                                MDASnum.push(MDASresult.toString());
+                                break;
+                            case "/":
+                                num1 = new BigDecimal(MDASnum.pop());
+                                num2 = new BigDecimal(MDASnum.pop());
+
+                                try {
+                                    MDASresult = num1.divide(num2);
+                                } catch (ArithmeticException e) {
+                                    if(!Objects.requireNonNull(e.getMessage()).contains("by zero")) {
+                                        MDASresult = num1.divide(num2, 11, RoundingMode.HALF_EVEN);
+                                        MDASnum.push(MDASresult.toString());
+                                    } else {
+                                        MDASresult = BigDecimal.valueOf(0);
+                                        MDASnum.push(MDASresult.toString());
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    MDASop.push(tempOP);
+                } else {
+                    MDASop.add(realKapoy[i]);
+                    // -,*,    +
+                }
             }
         }
 
-        txtTest.append("\n"+infix);
-        txtTest.append("\nINFIX SHIT: " + infix);
-    }
     public void calcuMDAS() {
+        // 9 6 3
+        // - +
 
     }
 
