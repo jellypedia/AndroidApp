@@ -241,11 +241,15 @@ public class Calculator extends AppCompatActivity {
 //                // TODO: AIRTHMETICEXCEPTION SHIT
                 try {
                     result = testNum1.divide(testNum2);
-                } catch (Exception e) {
-                    result = BigDecimal.valueOf(0);
-                    throw new ArithmeticException("real");
+                } catch (ArithmeticException e) {
+                    if(!Objects.requireNonNull(e.getMessage()).contains("by zero")) {
+                        result = testNum1.divide(testNum2, 11, RoundingMode.HALF_EVEN);
+                    } else {
+                        result = BigDecimal.valueOf(0);
+                    }
+//                    throw new ArithmeticException("real");
+
                 }
-                result = testNum1.divide(testNum2, 11, RoundingMode.HALF_EVEN);
 
                 break;
         }
